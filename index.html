@@ -54,41 +54,53 @@
                     $("#tablebody").append('<td colspan="3" class="text-danger text-center">' + fehlertext + '</td>'); // Fehlermeldung ausgeben
                 }                
 
-                // TODO Loginobjekt erstellen
-                // Benutzer: admin
-                // Passwort: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-                // Datenbankname: PXRESTAPI_DEMO
-                var loginObj;
+                // Loginobjekt erstellen
+                var loginObj = {
+                    Benutzer: "admin",
+                    Datenbank: {"Name":"PXRESTAPI_DEMO"},
+                    Module: ["ZEI"],
+                    Passwort: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                };
 
                 // **********
                 // *** Login
                 // **********
-                // TODO Request absetzen mit jQuery AJAX
                 $.ajax({
-                    // url: "https://remote.proffix.net:12121/pxapi/v2/PRO/Login",
-                    
+                    url: "https://remote.proffix.net:12121/pxapi/v2/PRO/Login",
+                    type: "post",
+                    data: JSON.stringify(loginObj), // zuvor erstelltes Loginobjekt als String übergeben (jQuery Hack)
+                    contentType: "application/json",
+                    dataType: "json",
                     complete: function(xhr) {
-                        // TODO erfolgreiche Antwort auswerten
-                        if(true) {
+                        if (xhr.status == 201) { // Wenn der Status Code 201 Created entspricht ist das Login erfolgreich
 
                             // **********
                             // *** Erweiterung abrufen
                             // **********
-                            // TODO Erweiterung abrufen mit jQuery AJAX
                             $.ajax({
-                                // url: "https://remote.proffix.net:12121/pxapi/v2/EXTENSION/PROFFIX/AttendanceListExtension/AttendanceList",
-                                
+                                url: "https://remote.proffix.net:12121/pxapi/v2/EXTENSION/PROFFIX/AttendanceListExtension/AttendanxceList",
+                                type: "get",
+                                headers: {
+                                    "PxSessionId": xhr.getResponseHeader('PxSessionId')
+                                },
+                                dataType: 'json',
                                 success: function(mitarbeiterliste) { // im Erfolgsfall
-
-                                    // TODO über 'mitarbeiterliste' iterieren und folgende Table Row hinzufügen:
-                                    // $("#tablebody").append('<tr><td id="manr' + ma.MitarbeiterName + '" class="text-center"><i class="fas fa-user-' + ((ma.Eingestempelt) ? 'check text-success' : 'times text-danger') + '"></i></td><td>' + ma.MitarbeiterName + '</td><td>' + ma.Dauer + '</td></tr>')
-                              
+                                    $("#tablebody").empty(); // Tabelle leeren
+                                    if(mitarbeiterliste.forEach) { // Wenn die Funktion 'forEach' über 'mitarbeiterliste' verfügbar ist, handelt es sich um ein Array
+                                        mitarbeiterliste.forEach(function(ma) { // für jeden Mitarbeiter in der Liste eine neue Zeile einfügen
+                                            if(ma.MitarbeiterName) {
+                                                $("#tablebody").append('<tr><td id="manr' + ma.MitarbeiterName + '" class="text-center"><i class="fas fa-user-' + ((ma.Eingestempelt) ? 'check text-success' : 'times text-danger') + '"></i></td><td>' + ma.MitarbeiterName + '</td><td>' + ma.Dauer + '</td></tr>')
+                                            }
+                                        });
+                                    } else { // im Fehlerfall (kein Array, warum auch immer, Bug in der Erweiterung)
+                                        fehlermeldung("Mitarbeiterliste kann nicht aufgelistet werden.");
+                                    }
                                 },
                                 error: function(jqXHR, status, err) { // im Fehlerfall (HTTP-Fehler von der REST API)
-                                    fehlermeldung("Mitarbeiterliste konnte nicht geladen werden.");
+                                    fehlermeldung("Mitarbeiterliste konnte nicht geladen werden: " + err);
                                 }
                             });
-                        } else { // Fehler wenn nicht eingeloggt werden konnte
+                        } else { // Wenn Status nicht 201 entspricht, ist beim Login ein Fehler aufgetreten.
                             fehlermeldung("Es ist ein Fehler beim Login aufgetreten.");
                         }
                     }
