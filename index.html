@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="de">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+
+        <title>Mitarbeiter Stempelliste</title>
+    </head>
+    <body>
+        <!-- Titelbalken -->
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container">
+                <a href="" class="navbar-brand">
+                    <i class="fas fa-users"></i> Mitarbeiter Stempelliste
+                </a>
+                <span class="navbar-text">Abrufen der Mitarbeiter Stempelliste via PROFFIX REST API Erweiterung</span>
+            </div>
+        </nav>
+
+        <!-- Tabellenaufbau -->
+        <div class="container pt-4">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 80px">Stempelstatus</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Dauer</th>
+                    </tr>
+                </thead>
+                <tbody id="tablebody">
+                    <tr>
+                        <td colspan="3" class="text-muted text-center"><i class="fas fa-circle-notch fa-spin"></i> Daten werden geladen...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SCRIPTS -->
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script>
+            $(document).ready(function() {
+
+                /**
+                 * Function fehlermeldung
+                 * Gibt anstelle des Table-Body eine rote Fehlermeldung aus
+                 * @param fehlertext: anzuzeigender Fehlertext der Fehlermeldung
+                 */
+                function fehlermeldung(fehlertext)
+                {
+                    $("#tablebody").empty(); // Tabelle leeren
+                    $("#tablebody").append('<td colspan="3" class="text-danger text-center">' + fehlertext + '</td>'); // Fehlermeldung ausgeben
+                }                
+
+                // TODO Loginobjekt erstellen
+                // Benutzer: admin
+                // Passwort: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                // Datenbankname: PXRESTAPI_DEMO
+                var loginObj;
+
+                // **********
+                // *** Login
+                // **********
+                // TODO Request absetzen mit jQuery AJAX
+                $.ajax({
+                    // url: "https://remote.proffix.net:12121/pxapi/v2/PRO/Login",
+                    
+                    complete: function(xhr) {
+                        // TODO erfolgreiche Antwort auswerten
+                        if(true) {
+
+                            // **********
+                            // *** Erweiterung abrufen
+                            // **********
+                            // TODO Erweiterung abrufen mit jQuery AJAX
+                            $.ajax({
+                                // url: "https://remote.proffix.net:12121/pxapi/v2/EXTENSION/PROFFIX/AttendanceListExtension/AttendanceList",
+                                
+                                success: function(mitarbeiterliste) { // im Erfolgsfall
+
+                                    // TODO über 'mitarbeiterliste' iterieren und folgende Table Row hinzufügen:
+                                    // $("#tablebody").append('<tr><td id="manr' + ma.MitarbeiterName + '" class="text-center"><i class="fas fa-user-' + ((ma.Eingestempelt) ? 'check text-success' : 'times text-danger') + '"></i></td><td>' + ma.MitarbeiterName + '</td><td>' + ma.Dauer + '</td></tr>')
+                              
+                                },
+                                error: function(jqXHR, status, err) { // im Fehlerfall (HTTP-Fehler von der REST API)
+                                    fehlermeldung("Mitarbeiterliste konnte nicht geladen werden.");
+                                }
+                            });
+                        } else { // Fehler wenn nicht eingeloggt werden konnte
+                            fehlermeldung("Es ist ein Fehler beim Login aufgetreten.");
+                        }
+                    }
+                })
+            });
+        </script>
+    </body>
+</html>
